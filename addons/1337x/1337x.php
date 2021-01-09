@@ -1,4 +1,5 @@
 <?php
+require_once "../helpers/AddonHelper.php";
 if (!class_exists("SearchLink")) {
     require_once "../helpers/SearchLink.php";
 }
@@ -6,7 +7,8 @@ if (!class_exists("SearchLink")) {
 /**
  * Class OneThreeThreeSevenX ::: 1337X
  */
-class OneThreeThreeSevenX implements ISite, ISearch {
+class OneThreeThreeSevenX implements ISite, ISearch
+{
     /** @var bool  */
     const ENABLE_LOGGING = false;
 
@@ -16,6 +18,7 @@ class OneThreeThreeSevenX implements ISite, ISearch {
     /** @var string  */
     private $url;
 
+    /** @var string */
     const SITE = "https://1337x.to";
 
     /**
@@ -36,7 +39,7 @@ class OneThreeThreeSevenX implements ISite, ISearch {
     }
 
     public function Search($keyword, $limit, $category) {
-        if (self::HARD_LIMIT) {
+        if (self::HARD_LIMIT && self::HARD_LIMIT < $limit) {
             $limit = self::HARD_LIMIT;
         }
         $this->log("Searching '$keyword' with limit($limit) in category($category)...");
@@ -200,7 +203,7 @@ class OneThreeThreeSevenX implements ISite, ISearch {
         // Size
         $size = !empty($size) ? floatval($size) : 0;
         $unit = !empty($unit) ? trim($unit) : "";
-        $sl->size  = $size * self::UnitSize($unit);
+        $sl->size  = $size * AddonHelper::UnitSize($unit);
 
         // Seeds
         $sl->seeds = intval($seeds);
@@ -230,20 +233,6 @@ class OneThreeThreeSevenX implements ISite, ISearch {
         $sl->test = "Jack";
 
         return $sl;
-    }
-
-    /**
-     * @param string $unit
-     * @return int
-     */
-    static function UnitSize($unit) {
-        switch (strtoupper(trim($unit))) {
-            case "KB": return 1000;
-            case "MB": return 1000000;
-            case "GB": return 1000000000;
-            case "TB": return 1000000000000;
-            default: return 1;
-        }
     }
 }
 

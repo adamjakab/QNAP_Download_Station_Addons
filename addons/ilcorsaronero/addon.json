@@ -1,0 +1,19 @@
+{
+  "author": "Adam Jakab",
+  "website": "https://jakab.pro",
+  "name": "Il Corsaro Nero",
+  "addon": "ilcorsaronero.php",
+  "class": "IlCorsaroNero",
+  "hosts": [
+    "ilcorsaronero.link"
+  ],
+  "domain": "ilcorsaronero",
+  "version": 100,
+  "interface": ["ISearch"],
+  "qpkg_dependencies": {
+    "DownloadStation": "5.0.0"
+  },
+  "description": {
+    "ENG": "Another good torrent search site"
+  }
+}
