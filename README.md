@@ -1,4 +1,4 @@
-QNAS DOWNLOAD STATION ADDONS
+QNAP DOWNLOAD STATION ADDONS
 ============================
 
 
