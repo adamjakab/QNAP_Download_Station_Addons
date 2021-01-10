@@ -1,5 +1,6 @@
 <?php
 require_once "../helpers/AddonHelper.php";
+require_once "../helpers/DownloadStationAddon.php";
 if (!class_exists("SearchLink")) {
     require_once "../helpers/SearchLink.php";
 }
@@ -7,7 +8,7 @@ if (!class_exists("SearchLink")) {
 /**
  * Class OneThreeThreeSevenX ::: 1337X
  */
-class OneThreeThreeSevenX implements ISite, ISearch
+class OneThreeThreeSevenX extends DownloadStationAddon implements ISite, ISearch
 {
     /** @var bool  */
     const ENABLE_LOGGING = false;
@@ -22,22 +23,11 @@ class OneThreeThreeSevenX implements ISite, ISearch
     const SITE = "https://1337x.to";
 
     /**
-     * OneThreeThreeSevenX constructor.
-     * @param null $url
-     * @param null $username
-     * @param null $password
-     * @param null $meta
+     * @param $keyword
+     * @param $limit
+     * @param $category
+     * @return array
      */
-    public function __construct($url = null, $username = null, $password = null, $meta = NULL) {
-        $this->url = $url;
-    }
-
-    private function log($msg) {
-        if (self::ENABLE_LOGGING) {
-            print($msg . "\n");
-        }
-    }
-
     public function Search($keyword, $limit, $category) {
         if (self::HARD_LIMIT && self::HARD_LIMIT < $limit) {
             $limit = self::HARD_LIMIT;
@@ -73,7 +63,6 @@ class OneThreeThreeSevenX implements ISite, ISearch
                         $enclosure_url = $this->ElaborateDetailPage($body);
                         $searchItem->enclosure_url = $enclosure_url;
                     });
-
                 }
             }
         }
@@ -88,7 +77,7 @@ class OneThreeThreeSevenX implements ISite, ISearch
 
         $this->log("Elaborating detail page...");
 
-        //print("\n" . $body);
+        //$this->log("\n" . $body);
 
         //magnet:?xt=urn:btih:HASH&dn=NAME
         $pattern = '#' .
@@ -99,7 +88,7 @@ class OneThreeThreeSevenX implements ISite, ISearch
 
         //$this->log("\nMagnet matches" . var_dump($matches));
 
-        if(isset($matches["magnet"][0])) {
+        if(isset($matches["magnet"][0]) && !empty($matches["magnet"][0])) {
             $answer = $matches["magnet"][0];
         }
 
@@ -130,10 +119,10 @@ class OneThreeThreeSevenX implements ISite, ISearch
 
         for ($i = 0 ; $i < $len ; ++$i) {
             try {
-                $sl = $this->getSearchLink(
+                $sl = AddonHelper::getSearchLink(
                     "1337x",
                     $matches["name"][$i],
-                    $matches["link"][$i],
+                    self::SITE . $matches["link"][$i],
                     $matches["size"][$i],
                     $matches["unit"][$i],
                     $matches["seeds"][$i],
@@ -161,78 +150,6 @@ class OneThreeThreeSevenX implements ISite, ISearch
         $this->log(">Limit: " . $limit);
 
         $page++;
-    }
-
-    /**
-     * @param string $source
-     * @param string $name
-     * @param string $link
-     * @param string $size
-     * @param string $unit
-     * @param string $seeds
-     * @param string $leechers
-     * @param string $time
-     * @param string $category
-     * @param string $enclosure_url
-     * @return SearchLink
-     * @throws Exception
-     */
-    protected function getSearchLink($source, $name, $link, $size, $unit, $seeds, $leechers, $time, $category, $enclosure_url) {
-        $sl = new SearchLink();
-
-        // Source
-        if (empty($source)) {
-            throw new \Exception("SearchLink: Undefined source!");
-        }
-        $sl->src = $source;
-
-        // Name
-        $name = trim(strip_tags($name));
-        if (empty($name)) {
-            throw new \Exception("SearchLink: Undefined name!");
-        }
-        $sl->name = $name;
-
-        // Link: points to the detail page on which the resource is found
-        $link = trim($link);
-        if (empty($link)) {
-            throw new \Exception("SearchLink: Undefined link!");
-        }
-        $sl->link = OneThreeThreeSevenX::SITE . $link;
-
-        // Size
-        $size = !empty($size) ? floatval($size) : 0;
-        $unit = !empty($unit) ? trim($unit) : "";
-        $sl->size  = $size * AddonHelper::UnitSize($unit);
-
-        // Seeds
-        $sl->seeds = intval($seeds);
-
-        // Peers
-        $sl->peers = intval($leechers);
-
-        // Time
-        if (!empty($time)) {
-            try {
-                $sl->time = new DateTime($time);
-            } catch (Exception $e) {
-                $sl->time = new DateTime();
-            }
-        }
-
-        // Category
-        $category = !empty($category) ? trim($category) : "Unknown";
-        $sl->category = $category;
-
-        // Enclosure URL: The link to the resource file to be downloaded
-        if (!empty($enclosure_url)) {
-            $sl->enclosure_url = $enclosure_url;
-        }
-
-        // Test
-        $sl->test = "Jack";
-
-        return $sl;
     }
 }
 
